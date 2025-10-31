@@ -5,7 +5,7 @@
 ## Tech Stack
 
 - Next.js 16 (App Router, Server Actions)
-- Prisma + SQLite (ローカル検証用)。PostgreSQL 互換の Supabase へ移行しやすいスキーマ設計
+- Prisma + SQLite (ローカル検証用)
 - TypeScript + Zod バリデーション
 - Vitest でサービス層のユースケースを検証
 
