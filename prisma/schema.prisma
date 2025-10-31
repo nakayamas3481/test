@@ -1,0 +1,89 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String                @id @default(cuid())
+  name         String
+  email        String                @unique
+  passwordHash String
+  jobTitle     String
+  role         String                @default("EMPLOYEE")
+  isActive     Boolean               @default(true)
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
+  expenses     ExpenseReport[]       @relation("SubmitterExpenses")
+  approvals    ExpenseApprovalStep[] @relation("AssignedApprover")
+  sessions     Session[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+
+  @@index([token, expiresAt])
+}
+
+model Workflow {
+  id                String         @id @default(cuid())
+  applicantJobTitle String         @unique
+  steps             WorkflowStep[]
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+}
+
+model WorkflowStep {
+  id            String   @id @default(cuid())
+  order         Int
+  approverTitle String
+  workflow      Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  workflowId    String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([workflowId, order], map: "workflow_order_idx")
+}
+
+model ExpenseReport {
+  id          String                @id @default(cuid())
+  title       String
+  amount      Float
+  description String?
+  receiptPath String?
+  status      String                @default("PENDING")
+  submitter   User                  @relation("SubmitterExpenses", fields: [submitterId], references: [id])
+  submitterId String
+  approvals   ExpenseApprovalStep[]
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+
+  @@index([submitterId])
+  @@index([status, createdAt])
+}
+
+model ExpenseApprovalStep {
+  id             String        @id @default(cuid())
+  order          Int
+  approverTitle  String
+  status         String        @default("PENDING")
+  decisionAt     DateTime?
+  comment        String?
+  expense        ExpenseReport @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  expenseId      String
+  assignedUser   User?         @relation("AssignedApprover", fields: [assignedUserId], references: [id])
+  assignedUserId String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([expenseId, order])
+  @@index([assignedUserId, status], map: "approver_queue_idx")
+}
