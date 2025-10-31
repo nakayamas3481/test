@@ -77,21 +77,3 @@ prisma/
 tests/
   expense-flow.test.ts
 ```
-
-## Supabase を利用する場合の考察
-
-- Supabase は PostgreSQL ベースであり、Prisma のスキーマを `provider = "postgresql"` に変更するだけで移行できます。
-- 認証については Supabase Auth を使うとメールリンク認証や OAuth が容易になりますが、本課題の範囲では職位ベースのローカル認証で仕様満たすため導入は見送りました。
-- ファイルアップロードは Supabase Storage を利用すれば署名付き URL を簡単に発行可能で、現状のローカルディスク保存よりも実運用向きです。
-- 2 日間での MVP 開発という観点では、インフラ構築に時間を割かずローカル SQLite & 手作りセッションに留めるほうが実装速度と検証容易性で有利と判断しました。研修後に本格運用する際の改善ポイントとして Supabase 連携を README と設計メモに記載しています。
-
-## よくある改善候補
-
-- Prisma Migration の導入 (現状は `db push` ベース)
-- API レイヤの整備と Next.js への API Routes 切り出し
-- Zod スキーマを使ったフロント側バリデーション強化
-- Supabase (PostgreSQL, Storage, Auth) への移行
-
-## ライセンス
-
-MIT
